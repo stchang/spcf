@@ -3,7 +3,7 @@
 
 (define-language pcf
   (e n f x (λ (x τ) e) (e e) (if0 e e e) (Y e)) ; Y and if0 should not be 1st class?
-  (f add1 sub1 if0)
+  (f add1 sub1)
   (n natural)
   (x variable-not-otherwise-mentioned)
   
@@ -56,3 +56,19 @@
 (test-equal (not (redex-match pcf e right+)) false)
 (test-equal (judgment-holds (typeof () ,left+ τ) τ) (term ((nat → (nat → nat)))))
 (test-equal (judgment-holds (typeof () ,right+ τ) τ) (term ((nat → (nat → nat)))))
+
+;; meaning function
+(define-metafunction pcf
+  E : e -> e
+  [(E n) n]
+  [(E f) f]
+  [(E x) x]
+  [(E (e_1 e_2)) (apply (E e_1) (E e_2))]
+  [(E (λ (x τ) e)) (λ (x τ) (E e))])
+
+(define-metafunction pcf
+  apply : e e -> e
+  [(apply add1 n) ,(add1 n)]
+  [(apply sub1 n) ,(sub1 n)]
+  [(apply add1 ⊥) ⊥]
+  [(apply sub1 ⊥) ⊥]
